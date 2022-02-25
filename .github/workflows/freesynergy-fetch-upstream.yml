@@ -1,0 +1,22 @@
+name: Fetch Upstream
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        
+      - name: Add remote "upstream"
+        run: git remote add upstream https://github.com/symless/synergy-core.git
+        
+      - run: git fetch upstream
+      
+      - run: git push
+      
+      - run: git push --tags
