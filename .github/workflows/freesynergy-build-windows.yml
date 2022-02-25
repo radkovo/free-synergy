@@ -30,7 +30,9 @@ jobs:
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
           cd ..
           copy ext\openssl\windows\x64\bin\* build\
+        shell: cmd
       - run: ls build/bin
+        shell: cmd
     
       - name: Zip binaries
         uses: papeloto/action-zip@v1
