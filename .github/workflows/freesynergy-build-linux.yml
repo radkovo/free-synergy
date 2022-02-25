@@ -3,7 +3,7 @@ name: Compile for Linux
 on:
   push:
     tags:
-      - "*-stable-nodrm"
+      - "*"
 
 jobs:
   build:
@@ -40,7 +40,6 @@ jobs:
 
       - name: Compile
         run: |
-          cd synergy-core
           mkdir build
           cd build
           cmake ..
