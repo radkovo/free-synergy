@@ -1,0 +1,49 @@
+name: Compile for Windows
+
+on:
+  push:
+    tags:
+      - "*"
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+    
+      - name: Install Build Dep - QT
+        uses: jurplel/install-qt-action@v2.14.0
+        with:
+          # Directory to install Qt
+          dir: C:\Qt
+          # Version of Qt to install
+          version: 5.12.10
+
+      - name: Compile
+        run: |
+          mkdir build
+          cd build
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Community\VC\Auxiliary\Build\vcvarsall.bat"
+          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Debug ..
+          msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
+          cd ..
+          copy ext\openssl\windows\x64\bin\* build\
+      - run: ls build/bin
+    
+      - name: Zip binaries
+        uses: papeloto/action-zip@v1
+        with:
+          files: |
+            build/bin/synergy
+            build/bin/synergyc
+            build/bin/synergyd
+            build/bin/synergys
+            build/bin/syntool
+          dest: windows-bin.zip
+          
+      - name: Upload Artifacts
+        uses: softprops/action-gh-release@v0.1.14
+        with: 
+          files: windows-bin.zip
