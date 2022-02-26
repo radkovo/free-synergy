@@ -36,6 +36,7 @@ jobs:
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat"
           cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Debug ..
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
+          echo: finished msbuild
           cd ..
           copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
