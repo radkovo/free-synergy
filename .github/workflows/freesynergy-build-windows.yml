@@ -13,13 +13,17 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
     
-      - name: Install Build Dep - QT
+      - name: Install Build Dependency - QT
         uses: jurplel/install-qt-action@v2.14.0
         with:
           # Directory to install Qt
           dir: C:\Qt
           # Version of Qt to install
           version: 5.12.10
+      
+      - name: Install Build Dependency - OpenSSL
+        run: choc install openssl
+        shell: cmd
 
       - name: Compile
         run: |
