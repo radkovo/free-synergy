@@ -22,7 +22,7 @@ jobs:
           version: 5.12.10
       
       - name: Install Build Dependency - OpenSSL
-        run: choc install openssl
+        run: choco install openssl
         shell: cmd
 
       - name: Compile
