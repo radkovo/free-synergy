@@ -13,6 +13,15 @@ jobs:
       - name: Checkout Code
         uses: actions/checkout@v2
     
+      - name: Install Build Dependency - Bonjour SDK
+        run: |
+          new-Item -Force -ItemType Directory -Path ".\deps\"
+          $client = new-object System.Net.WebClient
+          $client.DownloadFile("https://binaries.symless.com/bonjour/BonjourSDK.zip",".\deps\bonjoursdk.zip")
+          $client.DownloadFile("https://binaries.symless.com/bonjour/Bonjour64.msi",".\deps\Bonjour64.msi")
+          Get-ChildItem '.\deps\' -Filter *.zip | Expand-Archive -DestinationPath '.\deps'
+          msiexec.exe /i ${pwd}\deps\Bonjour64.msi INSTALLDIR="${pwd}\deps\Bonjour" /qb
+
       - name: Install Build Dependency - QT
         uses: jurplel/install-qt-action@v2.14.0
         with:
@@ -23,12 +32,8 @@ jobs:
       
       - name: Install Build Dependency - OpenSSL
         run: |
-          # https://github.com/symless/synergy-core/wiki/Compiling#:~:text=Install%20OpenSSL%20either%20directly%20or%20with%20Chocolatey
-          # Remove OpenSSL from PATH
-          # Delete OpenSSL from Program Files
-          echo %PATH%
-          choco install openssl
-        shell: cmd
+          choco install openssl -y --forcex64 --no-progress
+          Copy-Item -Path "C:\\Program Files\\OpenSSL-Win64" -Destination "$(GITHUB_WORKSPACE)\\ext\\openssl\\windows\\x64" -Recurse
         
       - name: Add msbuild to PATH
         run: set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\current\bin
@@ -43,7 +48,6 @@ jobs:
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
           echo: finished msbuild
           cd ..
-          # copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
 
       - run: ls build/bin
