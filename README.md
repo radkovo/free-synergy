@@ -3,6 +3,9 @@
 
 This is the open source core component of Synergy, a keyboard and mouse sharing tool, with Symless's DRM components removed.
 
+[![Linux Builds](https://github.com/Morpheus636/free-synergy/actions/workflows/freesynergy-build-linux.yml/badge.svg)](https://github.com/Morpheus636/free-synergy/actions/workflows/freesynergy-build-linux.yml)
+[![Windows Builds](https://github.com/Morpheus636/free-synergy/actions/workflows/freesynergy-build-windows.yml/badge.svg)](https://github.com/Morpheus636/free-synergy/actions/workflows/freesynergy-build-windows.yml)
+
 ## Advanced Users
 
 Not for the faint hearted. Only use these if you know what you're doing.
