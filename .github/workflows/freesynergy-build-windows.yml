@@ -43,14 +43,13 @@ jobs:
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
           echo: finished msbuild
           cd ..
-          ls ext\
-          ls ext\openssl\
-          ls ext\openssl\windows\
-          ls ext\openssl\windows\x64\
-          ls ext\openssl\windows\x64\bin\
-          copy ext\openssl\windows\x64\bin\* build\
+          # copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
+
       - run: ls build/bin
+        shell: cmd
+        
+      - run: ls build/
         shell: cmd
     
       - name: Zip binaries
