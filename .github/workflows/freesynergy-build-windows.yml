@@ -48,6 +48,7 @@ jobs:
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Debug /m
           echo: finished msbuild
           cd ..
+          copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
 
       - run: ls build/bin
