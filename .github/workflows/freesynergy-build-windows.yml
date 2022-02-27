@@ -22,7 +22,12 @@ jobs:
           version: 5.12.10
       
       - name: Install Build Dependency - OpenSSL
-        run: choco install openssl
+        run: |
+          # https://github.com/symless/synergy-core/wiki/Compiling#:~:text=Install%20OpenSSL%20either%20directly%20or%20with%20Chocolatey
+          # Remove OpenSSL from PATH
+          # Delete OpenSSL from Program Files
+          echo %PATH%
+          choco install openssl
         shell: cmd
         
       - name: Add msbuild to PATH
