@@ -33,7 +33,7 @@ jobs:
       - name: Install Build Dependency - OpenSSL
         run: |
           choco install openssl -y --forcex64 --no-progress
-          Copy-Item -Path "C:\\Program Files\\OpenSSL-Win64" -Destination "$GITHUB_WORKSPACE\\ext\\openssl\\windows\\x64" -Recurse
+          Copy-Item -Path "C:\Program Files\OpenSSL-Win64" -Destination "ext\openssl\windows\x64" -Recurse
         
       - name: Add msbuild to PATH
         run: set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\current\bin
