@@ -41,6 +41,7 @@ jobs:
 
       - name: Compile
         run: |
+          set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\current\bin
           mkdir build
           cd build
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64 10.0.19041.0
@@ -53,7 +54,8 @@ jobs:
 
       - name: Build .msi Installer
         run: |
-          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat")
+          set PATH=%PATH%;C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\MSBuild\current\bin
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64 10.0.19041.0          
           cd build\installer
           msbuild /p:Configuration=Release
           cd ..
