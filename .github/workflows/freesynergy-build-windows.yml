@@ -50,8 +50,9 @@ jobs:
           cd ..
           copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
-
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v0.1.14
         with: 
-          files: build\bin\Release\Synergy.msi
+          files: |
+            build\bin\Release\Synergy.msi
+            build\bin\Debug\Synergy.msi
