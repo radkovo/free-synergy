@@ -61,18 +61,9 @@ jobs:
           cd ..
           cd ..
         shell: cmd
-      
-      - name: \Debug
-        run: |
-          ls build\
-          ls build\bin
-          ls build\bin\Release
-          ls build\installer
-
 
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v0.1.14
         with: 
           files: |
-            build\bin\Release\Synergy.msi
-            build\bin\Debug\Synergy.msi
+            build/installer/bin/Release/Synergy.msi
