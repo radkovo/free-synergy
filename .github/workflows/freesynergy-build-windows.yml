@@ -44,12 +44,22 @@ jobs:
           mkdir build
           cd build
           call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat" x64 10.0.19041.0
-          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Debug ..
+          cmake -G "Visual Studio 16 2019" -DCMAKE_BUILD_TYPE=Release ..
           msbuild synergy-core.sln /p:Platform="x64" /p:Configuration=Release /m
           echo: finished msbuild
           cd ..
           copy ext\openssl\windows\x64\bin\* build\
         shell: cmd
+
+      - name: Build .msi Installer
+        run: |
+          call "C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise\VC\Auxiliary\Build\vcvarsall.bat")
+          cd build\installer
+          msbuild /p:Configuration=Release
+          cd ..
+          cd ..
+        shell: cmd
+
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v0.1.14
         with: 
