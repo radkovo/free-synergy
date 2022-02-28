@@ -61,6 +61,16 @@ jobs:
           cd ..
           cd ..
         shell: cmd
+      
+      - name: \Debug
+        run: |
+          ls build\
+          ls build\bin
+          ls build\bin\Release
+          ls build\bin\Debug
+          ls build\installer
+          ls build\bin
+
 
       - name: Upload Artifacts
         uses: softprops/action-gh-release@v0.1.14
