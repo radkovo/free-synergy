@@ -1416,10 +1416,11 @@ int MainWindow::raiseActivationDialog()
 void MainWindow::on_windowShown()
 {
 #ifndef SYNERGY_ENTERPRISE
-	if (!m_AppConfig->activationHasRun() &&
-		!m_LicenseManager->serialKey().isValid()){
-			raiseActivationDialog();
-	}
+    auto serialKey = m_LicenseManager->serialKey();
+    if (!m_AppConfig->activationHasRun() && !serialKey.isValid()) {
+        setEdition(Edition::kUnregistered);
+        raiseActivationDialog();
+    }
 #endif
 }
 
@@ -1478,6 +1479,7 @@ void MainWindow::updateScreenName()
 
 void MainWindow::enableServer(bool enable)
 {
+    m_AppConfig->setServerGroupChecked(enable);
     m_pRadioGroupServer->setChecked(enable);
 
     if (enable)
@@ -1497,6 +1499,7 @@ void MainWindow::enableServer(bool enable)
 
 void MainWindow::enableClient(bool enable)
 {
+    m_AppConfig->setClientGroupChecked(enable);
     m_pRadioGroupClient->setChecked(enable);
 
     if (enable)
@@ -1527,12 +1530,14 @@ void MainWindow::on_m_pRadioGroupServer_clicked(bool)
 {
     enableServer(true);
     enableClient(false);
+    m_AppConfig->saveSettings();
 }
 
 void MainWindow::on_m_pRadioGroupClient_clicked(bool)
 {
     enableClient(true);
     enableServer(false);
+    m_AppConfig->saveSettings();
 }
 
 void MainWindow::on_m_pButtonConnect_clicked()
