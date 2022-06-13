@@ -28,3 +28,8 @@ src/setup/win32/synergy.suo
 /doxygen/
 /deps
 .project
+flatpak/.flatpak-builder
+flatpak/build
+flatpak/export
+flatpak/synergy.desktop
+flatpak/*.flatpak

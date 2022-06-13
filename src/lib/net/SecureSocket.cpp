@@ -77,31 +77,13 @@ SecureSocket::SecureSocket(IEventQueue* events,
 
 SecureSocket::~SecureSocket()
 {
-    isFatal(true);
-    // take socket from multiplexer ASAP otherwise the race condition
-    // could cause events to get called on a dead object. TCPSocket
-    // will do this, too, but the double-call is harmless
-    setJob(NULL);
-    if (m_ssl->m_ssl != NULL) {
-        SSL_shutdown(m_ssl->m_ssl);
-
-        SSL_free(m_ssl->m_ssl);
-        m_ssl->m_ssl = NULL;
-    }
-    if (m_ssl->m_context != NULL) {
-        SSL_CTX_free(m_ssl->m_context);
-        m_ssl->m_context = NULL;
-    }
-    delete m_ssl;
+    freeSSL();
 }
 
 void
 SecureSocket::close()
 {
-    isFatal(true);
-
-    SSL_shutdown(m_ssl->m_ssl);
-
+    freeSSL();
     TCPSocket::close();
 }
 
@@ -415,6 +397,27 @@ SecureSocket::createSSL()
     }
 }
 
+void
+SecureSocket::freeSSL()
+{
+    isFatal(true);
+    // take socket from multiplexer ASAP otherwise the race condition
+    // could cause events to get called on a dead object. TCPSocket
+    // will do this, too, but the double-call is harmless
+    setJob(NULL);
+    if (m_ssl->m_ssl != NULL) {
+        SSL_shutdown(m_ssl->m_ssl);
+
+        SSL_free(m_ssl->m_ssl);
+        m_ssl->m_ssl = NULL;
+    }
+    if (m_ssl->m_context != NULL) {
+        SSL_CTX_free(m_ssl->m_context);
+        m_ssl->m_context = NULL;
+    }
+    delete m_ssl;
+}
+
 int
 SecureSocket::secureAccept(int socket)
 {
@@ -680,12 +683,12 @@ bool
 SecureSocket::verifyCertFingerprint()
 {
     // calculate received certificate fingerprint
-    X509 *cert = cert = SSL_get_peer_certificate(m_ssl->m_ssl);
-    EVP_MD* tempDigest;
+    using AutoX509 = std::unique_ptr<X509, decltype (&X509_free)>;
+    AutoX509 cert(SSL_get_peer_certificate(m_ssl->m_ssl), &X509_free);
+
     unsigned char tempFingerprint[EVP_MAX_MD_SIZE];
     unsigned int tempFingerprintLen;
-    tempDigest = (EVP_MD*)EVP_sha256();
-    int digestResult = X509_digest(cert, tempDigest, tempFingerprint, &tempFingerprintLen);
+    int digestResult = X509_digest(cert.get(), EVP_sha256(), tempFingerprint, &tempFingerprintLen);
 
     if (digestResult <= 0) {
         LOG((CLOG_ERR "failed to calculate fingerprint, digest result: %d", digestResult));
