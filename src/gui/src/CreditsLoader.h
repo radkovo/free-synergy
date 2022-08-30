@@ -1,6 +1,6 @@
 /*
  * synergy -- mouse and keyboard sharing utility
- * Copyright (C) 2022 Symless Ltd.
+ * Copyright (C) 2015-2022 Symless Ltd.
  *
  * This package is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -16,15 +16,30 @@
  */
 #pragma once
 
-#include "SerialKeyParser.h"
+#include <QObject>
+#include <QNetworkAccessManager>
 
-class SerialKeyParserV3 : public SerialKeyParser
+class QNetworkReply;
+class MainWindow;
+class AppConfig;
+
+class CreditsLoader : public QObject
 {
+    Q_OBJECT
 public:
-    /**
-     * @brief parse serial key
-     * @param plainSerial encoded serial key
-     * @return true if parsed
-     */
-    bool parse(const std::string& plainSerial) override;
+    explicit CreditsLoader(MainWindow& mainWindow, const AppConfig& config);
+    void loadEliteBackers();
+
+signals:
+    void loaded(const QString& eliteBakers) const;
+
+public slots:
+    void replyFinished(QNetworkReply* reply) const;
+
+private:
+    MainWindow& m_mainWindow;
+    const AppConfig& m_config;
+    QNetworkAccessManager m_manager;
+
+    void error(const QString& error) const;
 };

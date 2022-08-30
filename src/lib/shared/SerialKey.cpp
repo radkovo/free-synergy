@@ -80,7 +80,13 @@ SerialKey::isTrial() const
 bool
 SerialKey::isTemporary() const
 {
-    return m_data.keyType.isTemporary();
+    return (m_data.keyType.isTemporary() && !m_data.edition.isChina());
+}
+
+bool
+SerialKey::isMaintenance() const
+{
+    return (m_data.keyType.isMaintenance() || m_data.edition.isChina());
 }
 
 bool
@@ -119,6 +125,12 @@ SerialKey::daysLeft(time_t currentTime) const
     daysLeft = timeLeft % day != 0 ? 1 : 0;
 
     return timeLeft / day + daysLeft;
+}
+
+time_t
+SerialKey::getExpiration() const
+{
+    return m_data.expireTime;
 }
 
 int
