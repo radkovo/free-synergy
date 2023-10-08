@@ -210,6 +210,7 @@ private:
     void                handleStopRetry(const Event&, void*);
     void                onFileRecieveCompleted();
     void                sendClipboardThread(void*);
+    void                bindNetworkInterface(IDataSocket* socket) const;
 
 public:
     bool                m_mock;
@@ -238,7 +239,6 @@ private:
     using AutoThread = std::unique_ptr<Thread>;
     AutoThread          m_sendFileThread;
     AutoThread          m_writeToDropDirThread;
-    TCPSocket*          m_socket;
     bool                m_useSecureNetwork;
     bool                m_enableClipboard;
     size_t              m_maximumClipboardSize;

@@ -74,7 +74,6 @@ Client::Client(
     m_events(events),
     m_sendFileThread(nullptr),
     m_writeToDropDirThread(nullptr),
-    m_socket(NULL),
     m_useSecureNetwork(args.m_enableCrypto),
     m_args(args),
     m_enableClipboard(true),
@@ -135,29 +134,34 @@ Client::connect(size_t addressIndex)
     }
 
     try {
-        // resolve the server hostname.  do this every time we connect
-        // in case we couldn't resolve the address earlier or the address
-        // has changed (which can happen frequently if this is a laptop
-        // being shuttled between various networks).  patch by Brent
-        // Priddy.
-        m_resolvedAddressesCount = m_serverAddress.resolve(addressIndex);
-        
-        // m_serverAddress will be null if the hostname address is not reolved
-        if (m_serverAddress.getAddress() != nullptr) {
-          // to help users troubleshoot, show server host name (issue: 60)
-          LOG((CLOG_NOTE "connecting to '%s': %s:%i", 
-          m_serverAddress.getHostname().c_str(),
-          ARCH->addrToString(m_serverAddress.getAddress()).c_str(),
-          m_serverAddress.getPort()));
+        if (m_args.m_hostMode)
+        {
+            LOG((CLOG_NOTE "waiting for server conection on %i port", m_serverAddress.getPort()));
+        }
+        else {
+            // resolve the server hostname.  do this every time we connect
+            // in case we couldn't resolve the address earlier or the address
+            // has changed (which can happen frequently if this is a laptop
+            // being shuttled between various networks).  patch by Brent
+            // Priddy.
+            m_resolvedAddressesCount = m_serverAddress.resolve(addressIndex);
+
+            // m_serverAddress will be null if the hostname address is not reolved
+            if (m_serverAddress.getAddress() != nullptr) {
+              // to help users troubleshoot, show server host name (issue: 60)
+              LOG((CLOG_NOTE "connecting to '%s': %s:%i",
+              m_serverAddress.getHostname().c_str(),
+              ARCH->addrToString(m_serverAddress.getAddress()).c_str(),
+              m_serverAddress.getPort()));
+            }
         }
 
         // create the socket
         IDataSocket* socket = m_socketFactory->create(m_useSecureNetwork, ARCH->getAddrFamily(m_serverAddress.getAddress()));
-        m_socket = dynamic_cast<TCPSocket*>(socket);
+        bindNetworkInterface(socket);
 
         // filter socket messages, including a packetizing filter
-        m_stream = socket;
-        m_stream = new PacketStreamFilter(m_events, m_stream, true);
+        m_stream = new PacketStreamFilter(m_events, socket, true);
 
         // connect
         LOG((CLOG_DEBUG1 "connecting to server"));
@@ -426,7 +430,7 @@ Client::sendClipboard(ClipboardID id)
         // marshall the data
 		String data = clipboard.marshall();
 		if (data.size() >= m_maximumClipboardSize * 1024) {
-			LOG((CLOG_NOTE "Skipping clipboard transfer because the clipboard"
+			LOG((CLOG_NOTE "skipping clipboard transfer because the clipboard"
 				" contents exceeds the %i MB size limit set by the server",
 				m_maximumClipboardSize / 1024));
 			return;
@@ -546,10 +550,12 @@ Client::setupTimer()
 {
     assert(m_timer == NULL);
 
-    m_timer = m_events->newOneShotTimer(2.0, NULL);
-    m_events->adoptHandler(Event::kTimer, m_timer,
-                            new TMethodEventJob<Client>(this,
-                                &Client::handleConnectTimeout));
+    if (!m_args.m_hostMode) {
+        m_timer = m_events->newOneShotTimer(2.0, NULL);
+        m_events->adoptHandler(Event::kTimer, m_timer,
+                                new TMethodEventJob<Client>(this,
+                                    &Client::handleConnectTimeout));
+    }
 }
 
 void
@@ -758,7 +764,7 @@ Client::handleHello(const Event&, void*)
 
     if (isCompatible(major, minor)) {
         //because 1.6 is comptable with 1.7 and 1.8 - downgrading protocol for server
-        LOG((CLOG_NOTE "Downgrading protocol version for server"));
+        LOG((CLOG_NOTE "downgrading protocol version for server"));
         helloBackMinor = minor;
     }
     else if (major < kProtocolMajorVersion ||
@@ -829,6 +835,24 @@ Client::onFileRecieveCompleted()
     if (isReceivedFileSizeValid()) {
         auto method = new TMethodJob<Client>(this, &Client::writeToDropDirThread);
         m_writeToDropDirThread.reset(new Thread(method));
+    }
+}
+
+void Client::bindNetworkInterface(IDataSocket *socket) const
+{
+    try {
+        if (!m_args.m_synergyAddress.empty()) {
+            LOG((CLOG_DEBUG1 "bind to network interface: %s", m_args.m_synergyAddress.c_str()));
+
+            NetworkAddress bindAddress(m_args.m_synergyAddress);
+            bindAddress.resolve();
+
+            socket->bind(bindAddress);
+        }
+    }
+    catch(XBase& e) {
+        LOG((CLOG_WARN "%s", e.what()));
+        LOG((CLOG_WARN "operating system will select network interface automatically"));
     }
 }
 
